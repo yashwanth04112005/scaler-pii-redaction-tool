@@ -139,6 +139,13 @@ class FakeValueGenerator:
         memo[original_value] = generated
         return generated
 
+    def get_all_mappings(self) -> dict:
+        mappings = {}
+        for pii_type, values in self._seen.items():
+            for original, fake in values.items():
+                mappings[original] = fake
+        return mappings
+
 
 REPLACEMENTS = [
     ("email_address", re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")),
@@ -153,7 +160,7 @@ REPLACEMENTS = [
 ]
 
 
-def redact_text(text: str) -> tuple[str, dict]:
+def redact_text(text: str) -> tuple[str, dict, dict]:
     generator = FakeValueGenerator()
     redacted = text
     replacement_counts = {}
@@ -166,7 +173,7 @@ def redact_text(text: str) -> tuple[str, dict]:
         redacted, count = pattern.subn(replace_match, redacted)
         replacement_counts[pii_type] = count
 
-    return redacted, replacement_counts
+    return redacted, replacement_counts, generator.get_all_mappings()
 
 
 def evaluate_redaction(original: str, redacted: str) -> dict:
@@ -202,13 +209,17 @@ def main() -> None:
     input_path = Path(__file__).with_name("assignment_input.txt")
     output_txt = Path(__file__).with_name("redacted_output.txt")
     output_docx = Path(__file__).with_name("redacted_output.docx")
+    output_map = Path(__file__).with_name("redaction_mapping.txt")
 
     original = input_path.read_text(encoding="utf-8")
-    redacted, replacement_counts = redact_text(original)
+    redacted, replacement_counts, mappings = redact_text(original)
     metrics = evaluate_redaction(original, redacted)
 
     output_txt.write_text(redacted + "\n", encoding="utf-8")
     save_redacted_docx(redacted, str(output_docx))
+
+    mapping_lines = [f"{orig}: {fake}" for orig, fake in sorted(mappings.items())]
+    output_map.write_text("\n".join(mapping_lines) + "\n", encoding="utf-8")
 
     print("Original PII values found:", metrics["expected_total"])
     print("Redacted values detected:", metrics["replaced_total"])
@@ -218,7 +229,7 @@ def main() -> None:
     for pii_type, count in replacement_counts.items():
         if count:
             print(f"- {pii_type}: {count}")
-    print(f"Output saved to {output_txt} and {output_docx}")
+    print(f"Output saved to {output_txt}, {output_docx}, and {output_map}")
 
 
 if __name__ == "__main__":

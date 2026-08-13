@@ -1,0 +1,13 @@
++91 1234567645: +91 9000000002
++91 9876543210: +91 9000000001
+123 Main Street, Springfield, IL 62701: 101 Oak Street, Riverton, IL 62001
+123-45-6789: 201-11-1001
+192.168.1.9: 10.11.17.33
+1990-05-15: 1981-01-03
+4532-1234-5678-9010: 5100-0000-0000-0001
+Acme Corporation: Nimbus Labs Pvt Ltd
+Rashi Patil: Aarav Sharma
+Rohan Dey: Priya Kapoor
+rashhi.patil@gmail.com: aarav.sharma1@example.com
+rohan.dey@gmail.com: priya.kapoor2@mail.net
+test.user99@mail.com: kabir.malhotra3@sample.org

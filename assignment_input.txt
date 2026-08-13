@@ -1,6 +1,6 @@
-Rashi Patil: John Doe
+Rashi Patil
 rashhi.patil@gmail.com
-Rohan Dey: Peter Parker
+Rohan Dey
 rohan.dey@gmail.com
 test.user99@mail.com
 +91 9876543210
