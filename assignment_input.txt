@@ -1,0 +1,12 @@
+Rashi Patil: John Doe
+rashhi.patil@gmail.com
+Rohan Dey: Peter Parker
+rohan.dey@gmail.com
++91 9876543210
++91 1234567645
+123-45-6789
+4532-1234-5678-9010
+1990-05-15
+Acme Corporation
+123 Main Street, Springfield, IL 62701
+IP Address: 192.168.1.1
