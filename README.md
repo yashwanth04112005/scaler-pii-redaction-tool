@@ -48,9 +48,3 @@ The project was tested against the supplied assignment data and the actual run p
 - Redacted values detected: 14
 - Precision: 100.00%
 - Recall: 87.50%
-
-## Notes on quality and scope
-This is a focused, rule-based redaction workflow designed to satisfy the assignment task for the provided input format. It performs reliably on the visible patterns in this document, but it is not a fully general-purpose PII detector for arbitrary real-world text variations.
-
-## Final submission status
-The project meets the assignment’s required deliverables and is ready to submit as a working solution for this task.
