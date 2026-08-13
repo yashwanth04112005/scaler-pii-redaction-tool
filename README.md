@@ -26,12 +26,14 @@ Examples:
 - SSN -> `201-11-1001`
 
 ## How to run
-1. Place or update the input text in `assignment_input.txt`.
-2. Run:
+1. Place the source file next to the script as `Red Herring Prospectus.docx`.
+2. If the DOCX file is not present, the script falls back to `assignment_input.txt`.
+3. Run:
    `python assignment_redactor.py`
-3. Generated outputs:
+4. Generated outputs:
    - `redacted_output.txt`
    - `redacted_output.docx`
+   - `redaction_mapping.txt` (original value to fake value)
 
 ## Verified metrics (latest run)
 Run date: 2026-08-13

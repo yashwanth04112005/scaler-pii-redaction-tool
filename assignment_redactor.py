@@ -1,4 +1,5 @@
 import re
+import sys
 from pathlib import Path
 from docx import Document
 
@@ -162,6 +163,11 @@ REPLACEMENTS = [
 
 def redact_text(text: str) -> tuple[str, dict, dict]:
     generator = FakeValueGenerator()
+    redacted, replacement_counts = redact_with_generator(text, generator)
+    return redacted, replacement_counts, generator.get_all_mappings()
+
+
+def redact_with_generator(text: str, generator: FakeValueGenerator) -> tuple[str, dict]:
     redacted = text
     replacement_counts = {}
 
@@ -173,7 +179,51 @@ def redact_text(text: str) -> tuple[str, dict, dict]:
         redacted, count = pattern.subn(replace_match, redacted)
         replacement_counts[pii_type] = count
 
-    return redacted, replacement_counts, generator.get_all_mappings()
+    return redacted, replacement_counts
+
+
+def merge_counts(total: dict, current: dict) -> None:
+    for pii_type, count in current.items():
+        total[pii_type] = total.get(pii_type, 0) + count
+
+
+def extract_docx_text(document: Document) -> str:
+    lines = []
+    for paragraph in document.paragraphs:
+        lines.append(paragraph.text)
+
+    for table in document.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    lines.append(paragraph.text)
+
+    return "\n".join(lines)
+
+
+def redact_docx_file(input_path: Path, output_path: Path, generator: FakeValueGenerator) -> tuple[str, str, dict]:
+    original_doc = Document(str(input_path))
+    original_text = extract_docx_text(original_doc)
+
+    working_doc = Document(str(input_path))
+    total_counts = {}
+
+    for paragraph in working_doc.paragraphs:
+        redacted_line, counts = redact_with_generator(paragraph.text, generator)
+        paragraph.text = redacted_line
+        merge_counts(total_counts, counts)
+
+    for table in working_doc.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    redacted_line, counts = redact_with_generator(paragraph.text, generator)
+                    paragraph.text = redacted_line
+                    merge_counts(total_counts, counts)
+
+    working_doc.save(str(output_path))
+    redacted_text = extract_docx_text(working_doc)
+    return original_text, redacted_text, total_counts
 
 
 def evaluate_redaction(original: str, redacted: str) -> dict:
@@ -206,17 +256,40 @@ def save_redacted_docx(content: str, output_path: str) -> None:
 
 
 def main() -> None:
-    input_path = Path(__file__).with_name("assignment_input.txt")
+    script_dir = Path(__file__).parent
+    default_docx = script_dir / "Red Herring Prospectus.docx"
+    default_txt = Path(__file__).with_name("assignment_input.txt")
+
+    if len(sys.argv) > 1:
+        candidate = Path(sys.argv[1])
+        input_path = candidate if candidate.is_absolute() else (script_dir / candidate)
+    elif default_docx.exists():
+        input_path = default_docx
+    else:
+        input_path = default_txt
+
+    if not input_path.exists():
+        raise FileNotFoundError(
+            "No input file found. Place 'Red Herring Prospectus.docx' or 'assignment_input.txt' next to assignment_redactor.py"
+        )
+
     output_txt = Path(__file__).with_name("redacted_output.txt")
     output_docx = Path(__file__).with_name("redacted_output.docx")
     output_map = Path(__file__).with_name("redaction_mapping.txt")
 
-    original = input_path.read_text(encoding="utf-8")
-    redacted, replacement_counts, mappings = redact_text(original)
+    generator = FakeValueGenerator()
+
+    if input_path.suffix.lower() == ".docx":
+        original, redacted, replacement_counts = redact_docx_file(input_path, output_docx, generator)
+    else:
+        original = input_path.read_text(encoding="utf-8")
+        redacted, replacement_counts = redact_with_generator(original, generator)
+        save_redacted_docx(redacted, str(output_docx))
+
+    mappings = generator.get_all_mappings()
     metrics = evaluate_redaction(original, redacted)
 
     output_txt.write_text(redacted + "\n", encoding="utf-8")
-    save_redacted_docx(redacted, str(output_docx))
 
     mapping_lines = [f"{orig}: {fake}" for orig, fake in sorted(mappings.items())]
     output_map.write_text("\n".join(mapping_lines) + "\n", encoding="utf-8")
@@ -229,6 +302,7 @@ def main() -> None:
     for pii_type, count in replacement_counts.items():
         if count:
             print(f"- {pii_type}: {count}")
+    print(f"Input processed from {input_path}")
     print(f"Output saved to {output_txt}, {output_docx}, and {output_map}")
 
 
