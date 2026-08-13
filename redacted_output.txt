@@ -1,13 +1,14 @@
-[REDACTED_NAME]: [REDACTED_NAME]
-[REDACTED_EMAIL]
-[REDACTED_NAME]: [REDACTED_NAME]
-[REDACTED_EMAIL]
-[REDACTED_PHONE]
-[REDACTED_PHONE]
-[REDACTED_SSN]
-[REDACTED_CARD]
-[REDACTED_DOB]
-[REDACTED_COMPANY]
-[REDACTED_ADDRESS]
-IP Address: [REDACTED_IP]
+Aarav Sharma: Priya Kapoor
+aarav.sharma1@example.com
+Kabir Malhotra: Nisha Verma
+priya.kapoor2@mail.net
+kabir.malhotra3@sample.org
++91 9000000001
++91 9000000002
+201-11-1001
+5100-0000-0000-0001
+1981-01-03
+Nimbus Labs Pvt Ltd
+101 Oak Street, Riverton, IL 62001
+IP Address: 10.11.17.33
 
