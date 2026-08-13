@@ -2,15 +2,6 @@
 
 This project provides a Python script that reads a ticket log and replaces detected PII with realistic fake alternatives.
 
-## Assignment deliverables checklist
-This repository currently includes the required deliverables:
-
-- Source code for the redaction script: `assignment_redactor.py`
-- Redacted output file in plain text: `redacted_output.txt`
-- Redacted output file in DOCX format: `redacted_output.docx`
-- README explaining approach and tradeoffs: `README.md`
-- Evaluation report with metrics: `FINAL_EVALUATION_REPORT.md`
-
 ## Objective
 The script processes `assignment_input.txt`, detects supported PII values, and substitutes each with a fake but valid-looking value. Repeated occurrences are replaced consistently.
 
@@ -26,7 +17,7 @@ The script processes `assignment_input.txt`, detects supported PII values, and s
 - IP addresses
 
 ## Approach
-The implementation is rule-based and uses regex patterns for each required PII type. For each match, a deterministic fake generator creates a replacement value by category.
+The implementation is regex-based (rule-based) and does not use an NER model. It uses Python standard-library regex patterns to detect names, emails, phone numbers, SSNs, card numbers, DOBs, company names, addresses, and IP addresses. A deterministic fake-value generator then replaces each detected value so repeated inputs map to the same fake output.
 
 Examples:
 - Name -> `Aarav Sharma`
@@ -61,6 +52,8 @@ Per-type replacement counts from the latest run:
 - organization_name: 1
 - street_address: 1
 
-## Tradeoffs
-- Strength: Deterministic, transparent replacements and reproducible output.
-- Limitation: Regex coverage is only as broad as implemented patterns and may miss unseen formatting styles.
+## Tradeoffs and observed errors
+- Strength: deterministic and reproducible replacements, fast execution, and no heavy third-party model dependency for detection.
+- False negatives: regex can miss unseen formats (for example unusual address formats, uncommon phone separators, or names not covered by the current pattern strategy).
+- False positives: generic numeric patterns (especially phone/card-like patterns) may occasionally match non-PII numbers if text is noisy.
+- Overall: this works well for structured assignment-like ticket logs, but a production setup would likely combine regex with an NER model for better generalization.
